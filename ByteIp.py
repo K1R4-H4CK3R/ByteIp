@@ -19,19 +19,21 @@ def get_ip_address(url):
         ip_address = socket.gethostbyname(url)
         return ip_address
     except socket.gaierror:
-        return "\033[91m" + "𝐍𝐚̃𝐨 𝐟𝐨𝐢 𝐩𝐨𝐬𝐬𝐢𝐯𝐞𝐥 𝐨𝐛𝐭𝐞𝐫 𝐨 𝐢𝐧𝐝𝐞𝐫𝐞𝐜̧𝐨 𝐢𝐩 𝐝𝐞𝐬𝐭𝐞 𝐬𝐢𝐭𝐞." + "\033[0m"
+        return "\033[91m" + "Não foi possível obter o endereço IP do destino." + "\033[0m"
 
 def scan_ports(ip):
     open_ports = []
     try:
         nm = nmap.PortScanner()
         nm.scan(ip, arguments='-p-')  # Scan all ports
-        for port in nm[ip]['tcp'].keys():
-            if nm[ip]['tcp'][port]['state'] == 'open':
-                open_ports.append(port)
+        for protocol in nm[ip].all_protocols():
+            for port in nm[ip][protocol]:
+                state = nm[ip][protocol][port]['state']
+                if state == 'open':
+                    open_ports.append(port)
         return open_ports
-    except nmap.NmapError:
-        return "\033[91m" + "Erro ao escanear as portas." + "\033[0m"
+    except nmap.nmap.PortScannerError as e:
+        return "\033[91m" + f"Erro ao escanear as portas: {str(e)}" + "\033[0m"
 
 def find_vulnerabilities(ip):
     try:
@@ -47,14 +49,14 @@ def find_vulnerabilities(ip):
             return "\033[91m" + "Erro ao buscar vulnerabilidades:\n" + error_message + "\033[0m"
 
     except Exception as e:
-        return "\033[91m" + "Erro ao buscar vulnerabilidades: " + str(e) + "\033[0m"
+        return "\033[91m" + f"Erro ao buscar vulnerabilidades: {str(e)}" + "\033[0m"
         
 print(create_banner())
 
-url = input("\033[91m" + "𝐃𝐢𝐠𝐢𝐭𝐞 𝐚 𝐮𝐫𝐥 𝐝𝐨 𝐬𝐢𝐭𝐞: " + "\033[0m")
+url = input("\033[91m" + "Digite o URL do site: " + "\033[0m")
 ip = get_ip_address(url)
 
-print("\n\033[91m" + "𝐎 𝐢𝐧𝐝𝐞𝐫𝐞𝐜̧𝐨 𝐢𝐩 𝐝𝐨 𝐬𝐢𝐭𝐞", url, "𝐞́:", ip + "\033[0m")
+print("\n\033[91m" + "O endereço IP do site", url, "é:", ip + "\033[0m")
 
 # Verificar portas abertas
 open_ports = scan_ports(ip)
@@ -66,4 +68,4 @@ else:
 # Buscar vulnerabilidades
 print(find_vulnerabilities(ip))
 
-print("\n\033[91m" + "𝐎𝐛𝐫𝐢𝐠𝐚𝐝𝐨 𝐏𝐨𝐫 𝐔𝐬𝐚𝐫 𝐄𝐬𝐭𝐞 𝐒𝐜𝐫𝐢𝐩𝐭!" + "\033[0m")
+print("\n\033[91m" + "Obrigado Por Usar Este Script!" + "\033[0m")
