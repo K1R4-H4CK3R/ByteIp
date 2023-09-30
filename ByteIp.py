@@ -1,4 +1,5 @@
 import socket
+import subprocess
 import nmap  # Install this using pip: pip install python-nmap
 
 def create_banner():
@@ -33,11 +34,21 @@ def scan_ports(ip):
         return "\033[91m" + "Erro ao escanear as portas." + "\033[0m"
 
 def find_vulnerabilities(ip):
-    # Implement vulnerability scanning logic here
-    # This could involve using tools like Nessus, OpenVAS, or custom vulnerability checks
-    return "\033[91m" + "Função de busca de vulnerabilidades não implementada." + "\033[0m"
+    try:
+        # Usando openvas-cli para buscar vulnerabilidades
+        cmd = f"openvas-cli --target {ip} --get-users"
+        result = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-# Chamada para imprimir o banner
+        if result.returncode == 0:
+            vulnerabilities = result.stdout
+            return "\n\033[91m" + "Vulnerabilidades encontradas:\n" + vulnerabilities + "\033[0m"
+        else:
+            error_message = result.stderr
+            return "\033[91m" + "Erro ao buscar vulnerabilidades:\n" + error_message + "\033[0m"
+
+    except Exception as e:
+        return "\033[91m" + "Erro ao buscar vulnerabilidades: " + str(e) + "\033[0m"
+        
 print(create_banner())
 
 url = input("\033[91m" + "𝐃𝐢𝐠𝐢𝐭𝐞 𝐚 𝐮𝐫𝐥 𝐝𝐨 𝐬𝐢𝐭𝐞: " + "\033[0m")
